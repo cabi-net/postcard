@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>write your own art</title>
+  <title>send a digital postcard</title>
   <style>
     @font-face {
       font-family: 'Interlope';
@@ -274,8 +274,7 @@
     #confirmSendBtn:hover { opacity: 1; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="../lib/p5.js"></script>
-  <script src="../lib/p5.sound.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
   <script src="palettes.js"></script>
   <script src="sketch.js"></script>
 
@@ -307,6 +306,7 @@
         <span id="sendStatus" style="font-size:11px;color:#888;opacity:0;transition:opacity 0.3s;"></span>
       </div>
     </div>
+    <!-- flavourSelect is intentionally hidden; expose in dev/debug mode only -->
     <select id="flavourSelect" style="display: none;">
       <option value="original">Original</option>
       <option value="periwink">Periwink</option>
@@ -410,6 +410,7 @@
     }
 
     async function doSend() {
+      if (!frontImgData || !backImgData) { showSendStatus('postcard not ready', '#888'); return; }
       const name = document.getElementById('senderName').value.trim() || 'someone';
       const toEmail = sendTarget === 'me'
         ? RECIPIENT_EMAIL
@@ -417,6 +418,7 @@
       if (!toEmail) { showSendStatus('enter an email first', '#888'); return; }
       document.getElementById('sender-form').classList.remove('open');
       document.getElementById('confirmSendBtn').disabled = true;
+      document.getElementById('resetBtn').disabled = true;
       showSendStatus('sending…', '#888');
       try {
         const [frontUrl, backUrl] = await Promise.all([
@@ -438,6 +440,7 @@
         document.getElementById('sender-form').classList.add('open');
       } finally {
         document.getElementById('confirmSendBtn').disabled = false;
+        document.getElementById('resetBtn').disabled = false;
       }
     }
     const confirmSendBtn = document.getElementById('confirmSendBtn');

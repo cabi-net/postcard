@@ -222,12 +222,8 @@ function keyMatches(effectName) {
 
 // Helper to get palette by name
 function getPalette(name) {
-  if (name === 'cherryBlossomBloom') return cherryBlossomBloom;
-  if (name === 'palette2') return palette2;
-  if (name === 'palette1') return palette1;
-  if (name === 'mini') return mini;
-  if (name === 'periwink') return periwink;
-  return palette2;
+  const map = { cherryBlossomBloom, palette2, palette1, mini, periwink };
+  return map[name] ?? palette2;
 }
 
 // Get primary/secondary palette for current flavour
@@ -268,16 +264,12 @@ function setup() {
     let currentText = this.value();
     let currentLength = currentText.length;
 
-      // Check if text was deleted (backspace/delete)
     if (currentLength < previousLength) {
-      keyCode = BACKSPACE;
-      keyPressed();
-    }
-    // Text was added
-    else if (currentLength > previousLength) {
+      handleBackspace();
+    } else if (currentLength > previousLength) {
       let lastChar = currentText.charAt(currentLength - 1);
       key = lastChar;
-      keyTyped(); // Trigger the art creation!
+      keyTyped();
     }
 
     previousLength = currentLength;
@@ -290,7 +282,6 @@ function setup() {
   flavourSelect.changed(function() {
     let flavourName = this.value();
     currentFlavour = flavours[flavourName];
-    console.log('Switched to flavour:', currentFlavour.name);
     // Clear canvas when switching flavours
     background(27, 27, 27);
   });
@@ -305,8 +296,10 @@ function setup() {
 }
 
 function windowResized() {
+  let snapshot = get();
   let sz = document.getElementById('canvas-container').clientWidth;
   resizeCanvas(sz, sz);
+  image(snapshot, 0, 0, sz, sz);
 }
 
 function draw() {
@@ -763,14 +756,15 @@ function keyTyped() {
   if (keyMatches('jitter')) {
     loadPixels();
     let d = pixelDensity();
+    let rowStride = width * d * 4;
     for (let pass = 0; pass < 3; pass++) {
       let offset = floor(random(5, 70));
-      for (let y = 0; y < height; y++) {
+      for (let y = 0; y < height * d; y++) {
         if (random() > 0.5) {
-          let rowStart = 4 * (y * width * d * d);
-          let rowEnd = rowStart + (width * 4 * d * d);
+          let rowStart = y * rowStride;
+          let rowEnd = rowStart + rowStride;
           for (let i = rowStart; i < rowEnd - offset * 4; i += 4) {
-            pixels[i] = pixels[i + offset * 4];
+            pixels[i]     = pixels[i + offset * 4];
             pixels[i + 1] = pixels[i + offset * 4 + 1];
             pixels[i + 2] = pixels[i + offset * 4 + 2];
           }
@@ -1086,59 +1080,67 @@ function keyPressed() {
       activeEl === document.getElementById('recipientEmail')) return;
   // SPACEBAR - random overlay effect
   if (key === ' ') {
-    let choice = floor(random(5));
-
-    if (choice === 0) {
-      for (let i = 0; i < floor(random(15, 30)); i++) {
-        let c = color(random(secondaryPalette()));
-        c.setAlpha(random(3, 25));
-        fill(c);
-        rect(0, random(height), width, random(10, 50));
-      }
-    } else if (choice === 1) {
-      for (let j = 0; j < floor(random(25, 60)); j++) {
-        let c = color(random(primaryPalette()));
-        c.setAlpha(random(50, 200));
-        fill(c);
-        circle(random(width), random(height), random(1, 8));
-      }
-    } else if (choice === 2) {
-      for (let i = 0; i < floor(random(3, 8)); i++) {
-        let c = color(random(primaryPalette()));
-        c.setAlpha(random(5, 20));
-        fill(c);
-        rect(0, 0, width, height);
-      }
-    } else if (choice === 3) {
-      for (let i = 0; i < floor(random(10, 25)); i++) {
-        let c = color(random(secondaryPalette()));
-        c.setAlpha(random(5, 30));
-        fill(c);
-        push();
-        translate(random(width), random(height));
-        rotate(random(-PI, PI));
-        rect(0, 0, random(50, 200), random(2, 15));
-        pop();
-      }
-    } else {
-      for (let j = 0; j < floor(random(15, 40)); j++) {
-        let c = color(random(primaryPalette()));
-        c.setAlpha(random(20, 80));
-        fill(c);
-        if (random() > 0.5) {
-          circle(random(width), random(height), random(3, 15));
-        } else {
-          rect(random(width), random(height), random(3, 15), random(3, 15));
+    const spaceEffects = [
+      () => {
+        for (let i = 0; i < floor(random(15, 30)); i++) {
+          let c = color(random(secondaryPalette()));
+          c.setAlpha(random(3, 25));
+          fill(c);
+          rect(0, random(height), width, random(10, 50));
         }
-      }
-    }
+      },
+      () => {
+        for (let j = 0; j < floor(random(25, 60)); j++) {
+          let c = color(random(primaryPalette()));
+          c.setAlpha(random(50, 200));
+          fill(c);
+          circle(random(width), random(height), random(1, 8));
+        }
+      },
+      () => {
+        for (let i = 0; i < floor(random(3, 8)); i++) {
+          let c = color(random(primaryPalette()));
+          c.setAlpha(random(5, 20));
+          fill(c);
+          rect(0, 0, width, height);
+        }
+      },
+      () => {
+        for (let i = 0; i < floor(random(10, 25)); i++) {
+          let c = color(random(secondaryPalette()));
+          c.setAlpha(random(5, 30));
+          fill(c);
+          push();
+          translate(random(width), random(height));
+          rotate(random(-PI, PI));
+          rect(0, 0, random(50, 200), random(2, 15));
+          pop();
+        }
+      },
+      () => {
+        for (let j = 0; j < floor(random(15, 40)); j++) {
+          let c = color(random(primaryPalette()));
+          c.setAlpha(random(20, 80));
+          fill(c);
+          if (random() > 0.5) {
+            circle(random(width), random(height), random(3, 15));
+          } else {
+            rect(random(width), random(height), random(3, 15), random(3, 15));
+          }
+        }
+      },
+    ];
+    random(spaceEffects)();
   }
 
-  // DELETE/BACKSPACE - fade layer
   if (keyCode === DELETE || keyCode === BACKSPACE) {
-    fill(27, 27, 27, 30); // Match background color
-    noStroke();
-    rect(0, 0, width, height);
+    handleBackspace();
   }
+}
+
+function handleBackspace() {
+  fill(27, 27, 27, 30);
+  noStroke();
+  rect(0, 0, width, height);
 }
 
