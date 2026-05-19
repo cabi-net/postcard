@@ -239,7 +239,7 @@ function preload() {
   img = loadImage('gfx/015.GIF');
   maskImg = loadImage('gfx/picmix.gif');
   universFont = loadFont('assets/Univers/UniversBold.ttf');
-  interlopeFont = loadFont('assets/interlope-main/font/ttf/Interlope-Regular.ttf');
+  interlopeFont = loadFont('assets/interlope-main/font/otf/Interlope-Regular.otf');
   girl = loadImage('gfx/giribal.gif');
   flowers = loadImage('gfx/flowers02.gif');
 }
