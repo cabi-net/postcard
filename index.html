@@ -48,10 +48,36 @@
       background-size: 80px auto;
       opacity: 0.85;
       pointer-events: none;
+      z-index: 5;
     }
 
     .grape-border.left  { left: 0; }
     .grape-border.right { right: 0; }
+
+    #site-link {
+      position: fixed;
+      top: 14px;
+      left: 90px;
+      z-index: 20;
+    }
+
+    #site-link a {
+      font-family: 'Avara', sans-serif;
+      font-size: 11px;
+      color: #fff;
+      text-decoration: none;
+      opacity: 0.4;
+      letter-spacing: 0.05em;
+      transition: opacity 0.3s;
+    }
+
+    #site-link a:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 540px) {
+      #site-link { left: 50px; }
+    }
 
     #canvas-container {
       width: min(480px, 100%);
@@ -283,6 +309,7 @@
 <body>
   <div class="grape-border left"></div>
   <div class="grape-border right"></div>
+  <div id="site-link"><a href="https://cabi-net.neocities.org/" target="_blank" rel="noopener">made by cabi-net ↗</a></div>
   <div id="canvas-container">
     <!-- p5.js canvas will be attached here -->
   </div>
